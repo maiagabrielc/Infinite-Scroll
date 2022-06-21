@@ -6,16 +6,16 @@ let imagesLoaded = 0;
 let totalImages = 0;
 let photosArray = [];
 
-const count = 30;
-const apiKey = secrets.API_UNSPLASH || process.env.API_UNSPLASH;
+const count = 10;
+let page = 1;
 
-// Unsplash API
-const apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}`;
+// Proxy cross server
+const proxyUrl = 'https://murmuring-inlet-62825.herokuapp.com/'
 
 // Check if all images were loaded
 function imageLoaded() {
   imagesLoaded++;
-  if (imagesLoaded === totalImages || imagesLoaded > 6) {
+  if (imagesLoaded === totalImages || imagesLoaded > 4) {
     ready = true;
     loader.hidden = true;
     imagesLoaded = 0;
@@ -37,15 +37,15 @@ function displayPhotos() {
     // Create <a> to link Unsplash
     const item = document.createElement('a');
     setAttributes(item, {
-      href: photo.links.html,
+      href: photo.download_url,
       target: '_blank',
     });
     // Create <img> for photo
     const img = document.createElement('img');
     setAttributes(img, {
-      src: photo.urls.regular,
-      alt: photo.alt_description,
-      title: photo.description,
+      src: photo.download_url,
+      alt: photo.author,
+      title: photo.author,
     });
     // Event Listener, check when each is finished loading
     img.addEventListener('load', imageLoaded);
@@ -57,9 +57,13 @@ function displayPhotos() {
 
 // Get photos from Unsplash API
 async function getPhotos() {
+  page = Math.floor(Math.random() * 100);
   try {
+    // Picsum API
+    const apiUrl = `https://picsum.photos/v2/list?page=${page}&limit=${count}`;
     const response = await fetch(apiUrl);
     photosArray = await response.json();
+    page++
     displayPhotos();
   } catch (error) {
     console.log('Ops... ',error);
@@ -72,7 +76,7 @@ window.addEventListener('scroll', () => {
     ready = false;
     getPhotos();
   }
-})
+});
 
 // On Load
 getPhotos();
